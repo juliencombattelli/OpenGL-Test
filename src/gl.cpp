@@ -9,6 +9,11 @@
 #include <fstream>
 #include <sstream>
 
+#include "Camera.hpp"
+#include "Mesh.hpp"
+#include "Model.hpp"
+#include "Shader.hpp"
+
 int main()
 {
 	sf::ContextSettings settings;
@@ -39,6 +44,10 @@ int main()
 
     glViewport(0, 0, window.getSize().x, window.getSize().y);
 
+    Camera cam(glm::vec3{0,0,3});
+    Shader ourShader("shaders/simple.vert", "shaders/simple.frag");
+    Model ourModel("./suzanne.obj");
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -53,6 +62,16 @@ int main()
         }
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        ourShader.use();
+		glm::mat4 projection = glm::perspective(glm::radians(cam.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+		glm::mat4 view = cam.GetViewMatrix();
+		ourShader.setMat4("projection", projection);
+		ourShader.setMat4("view", view);
+		glm::mat4 model = glm::mat4(1);
+		ourShader.setMat4("model", model);
+        ourModel.Draw(ourShader);
 
 
         window.display();

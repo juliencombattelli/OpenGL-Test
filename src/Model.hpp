@@ -1,17 +1,16 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <glad/glad.h> 
+#include <GL/glew.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <stb_image.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#include <learnopengl/mesh.h>
-#include <learnopengl/shader.h>
+#include "stb_image.h"
+#include "Mesh.hpp"
+#include "Shader.hpp"
 
 #include <string>
 #include <fstream>
@@ -53,7 +52,7 @@ private:
     {
         // read file via ASSIMP
         Assimp::Importer importer;
-        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+        const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
         // check for errors
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
@@ -61,7 +60,7 @@ private:
             return;
         }
         // retrieve the directory path of the filepath
-        directory = path.substr(0, path.find_last_of('/'));
+        //directory = path.substr(0, path.find_last_of('/'));
 
         // process ASSIMP's root node recursively
         processNode(scene->mRootNode, scene);
@@ -121,15 +120,15 @@ private:
             else
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
             // tangent
-            vector.x = mesh->mTangents[i].x;
-            vector.y = mesh->mTangents[i].y;
-            vector.z = mesh->mTangents[i].z;
-            vertex.Tangent = vector;
+            //vector.x = mesh->mTangents[i].x;
+            //vector.y = mesh->mTangents[i].y;
+            //vector.z = mesh->mTangents[i].z;
+            //vertex.Tangent = vector;
             // bitangent
-            vector.x = mesh->mBitangents[i].x;
-            vector.y = mesh->mBitangents[i].y;
-            vector.z = mesh->mBitangents[i].z;
-            vertex.Bitangent = vector;
+            //vector.x = mesh->mBitangents[i].x;
+            //vector.y = mesh->mBitangents[i].y;
+            //vector.z = mesh->mBitangents[i].z;
+            //vertex.Bitangent = vector;
             vertices.push_back(vertex);
         }
         // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
