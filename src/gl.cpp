@@ -60,18 +60,18 @@ float cube[] = {
 
 int main()
 {
-	sf::ContextSettings settings;
-	settings.depthBits = 24;
-	settings.stencilBits = 8;
-	settings.antialiasingLevel = 4;
-	settings.majorVersion = 3;
-	settings.minorVersion = 3;
-	settings.attributeFlags = sf::ContextSettings::Core;
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 4;
+    settings.majorVersion = 3;
+    settings.minorVersion = 3;
+    settings.attributeFlags = sf::ContextSettings::Core;
 
-	const GLuint width = 1024;
-	const GLuint height = 768;
+    const GLuint width = 1024;
+    const GLuint height = 768;
 
-    sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Fullscreen, settings);
+    sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
     window.setMouseCursorVisible(false);
     sf::Mouse::setPosition({width/2, height/2});
     window.setVerticalSyncEnabled(true);
@@ -86,8 +86,8 @@ int main()
     window.setActive();
 
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 
     glViewport(0, 0, window.getSize().x, window.getSize().y);
 
@@ -131,9 +131,9 @@ int main()
     sf::Clock clock;
     while (window.isOpen())
     {
-    	float currentFrame = clock.getElapsedTime().asSeconds();
-    	deltaTime = currentFrame - lastFrame;
-    	lastFrame = currentFrame;
+        float currentFrame = clock.getElapsedTime().asSeconds();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -147,55 +147,55 @@ int main()
         }
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-        	camera.ProcessKeyboard(FORWARD, deltaTime);
+            camera.ProcessKeyboard(FORWARD, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
             camera.ProcessKeyboard(BACKWARD, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
             camera.ProcessKeyboard(LEFT, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-        	camera.ProcessKeyboard(RIGHT, deltaTime);
+            camera.ProcessKeyboard(RIGHT, deltaTime);
 
 
-		camera.ProcessMouseMovement(
-				sf::Mouse::getPosition(window).x - width/2.0f,
-				height/2.0f - sf::Mouse::getPosition(window).y,
-				false);
-		sf::Mouse::setPosition({width/2, height/2}, window);
+        camera.ProcessMouseMovement(
+                        sf::Mouse::getPosition(window).x - width/2.0f,
+                        height/2.0f - sf::Mouse::getPosition(window).y,
+                        false);
+        sf::Mouse::setPosition({width/2, height/2}, window);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
         // be sure to activate shader when setting uniforms/drawing objects
-		lightingShader.use();
-		lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-		lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-		lightingShader.setVec3("lightPos", lightPos);
+        lightingShader.use();
+        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("lightPos", lightPos);
 
-		// view/projection transformations
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		lightingShader.setMat4("projection", projection);
-		lightingShader.setMat4("view", view);
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        lightingShader.setMat4("projection", projection);
+        lightingShader.setMat4("view", view);
 
-		// world transformation
-		glm::mat4 model;
-		lightingShader.setMat4("model", model);
+        // world transformation
+        glm::mat4 model;
+        lightingShader.setMat4("model", model);
 
-		// render the cube
-		glBindVertexArray(cubeVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+        // render the cube
+        glBindVertexArray(cubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
-		// also draw the lamp object
-		lampShader.use();
-		lampShader.setMat4("projection", projection);
-		lampShader.setMat4("view", view);
-		model = glm::mat4();
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-		lampShader.setMat4("model", model);
+        // also draw the lamp object
+        lampShader.use();
+        lampShader.setMat4("projection", projection);
+        lampShader.setMat4("view", view);
+        model = glm::mat4();
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lampShader.setMat4("model", model);
 
-		glBindVertexArray(lightVAO);
+        glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         window.display();
