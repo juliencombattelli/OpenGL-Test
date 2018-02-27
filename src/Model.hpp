@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -101,12 +102,12 @@ private:
             vector.x = mesh->mVertices[i].x;
             vector.y = mesh->mVertices[i].y;
             vector.z = mesh->mVertices[i].z;
-            vertex.Position = vector;
+            vertex.position = vector;
             // normals
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
             vector.z = mesh->mNormals[i].z;
-            vertex.Normal = vector;
+            vertex.normal = vector;
             // texture coordinates
             if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
             {
@@ -115,10 +116,10 @@ private:
                 // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
                 vec.x = mesh->mTextureCoords[0][i].x; 
                 vec.y = mesh->mTextureCoords[0][i].y;
-                vertex.TexCoords = vec;
+                vertex.texCoord = vec;
             }
             else
-                vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+                vertex.texCoord = glm::vec2(0.0f, 0.0f);
             // tangent
             //vector.x = mesh->mTangents[i].x;
             //vector.y = mesh->mTangents[i].y;
@@ -131,7 +132,7 @@ private:
             //vertex.Bitangent = vector;
             vertices.push_back(vertex);
         }
-        // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+        // now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
         for(unsigned int i = 0; i < mesh->mNumFaces; i++)
         {
             aiFace face = mesh->mFaces[i];
@@ -192,7 +193,7 @@ private:
                 texture.type = typeName;
                 texture.path = str.C_Str();
                 textures.push_back(texture);
-                textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+                textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate textures.
             }
         }
         return textures;
@@ -228,14 +229,11 @@ unsigned int TextureFromFile(const char *path, const string &directory, bool gam
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
     }
     else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
+        std::cerr << "ERROR::STB_IMAGE : Texture failed to load at path " << path << std::endl;
+
+    stbi_image_free(data);
 
     return textureID;
 }
