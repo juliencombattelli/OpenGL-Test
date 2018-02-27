@@ -58,6 +58,50 @@ float cube[] = {
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
 
+class GLWindow
+{
+public:
+
+	static constexpr GLuint width = 1024;
+	static constexpr GLuint height = 768;
+
+	GLWindow()
+	{
+		sf::ContextSettings settings;
+		settings.depthBits = 24;
+		settings.stencilBits = 8;
+		settings.antialiasingLevel = 4;
+		settings.majorVersion = 3;
+		settings.minorVersion = 3;
+		settings.attributeFlags = sf::ContextSettings::Core;
+
+		sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
+		window.setMouseCursorVisible(false);
+		sf::Mouse::setPosition(sf::Vector2i{width/2, height/2});
+		window.setVerticalSyncEnabled(true);
+
+		glewExperimental = true;
+		if (glewInit() != GLEW_OK)
+		{
+			fprintf(stderr, "Failed to initialize GLEW\n");
+		}
+
+		window.setActive();
+
+		glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
+	}
+
+private:
+
+	sf::Window m_window;
+	Camera m_camera;
+    sf::Clock m_clock;
+	float m_deltaTime = 0.0f;
+	float m_lastFrame = 0.0f;
+};
+
 int main()
 {
     sf::ContextSettings settings;
@@ -73,7 +117,7 @@ int main()
 
     sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
     window.setMouseCursorVisible(false);
-    sf::Mouse::setPosition({width/2, height/2});
+    sf::Mouse::setPosition(sf::Vector2i{width/2, height/2});
     window.setVerticalSyncEnabled(true);
 
     glewExperimental = true;
@@ -128,6 +172,7 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+
     sf::Clock clock;
     while (window.isOpen())
     {
@@ -160,15 +205,15 @@ int main()
                         sf::Mouse::getPosition(window).x - width/2.0f,
                         height/2.0f - sf::Mouse::getPosition(window).y,
                         false);
-        sf::Mouse::setPosition({width/2, height/2}, window);
+        sf::Mouse::setPosition(sf::Vector2i{width/2, height/2}, window);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
         // be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
-        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        lightingShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f});
+        lightingShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
         lightingShader.setVec3("lightPos", lightPos);
 
         // view/projection transformations
