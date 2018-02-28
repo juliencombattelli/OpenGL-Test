@@ -61,6 +61,11 @@ public:
         setupMesh();
     }
 
+    ~Mesh()
+    {
+    	// FIXME: release OpenGL resources
+    }
+
     void Draw(Shader& shader)
     {
         unsigned int diffuseNr = 1;

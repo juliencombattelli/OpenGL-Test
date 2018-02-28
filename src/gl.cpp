@@ -147,7 +147,8 @@ int main()
     glm::vec3 lightPos(10, 10, 0);
 
     sf::Clock clock;
-    while (window.isOpen())
+    bool isRunning = true;
+    while (isRunning)
     {
         float currentFrame = clock.getElapsedTime().asSeconds();
         deltaTime = currentFrame - lastFrame;
@@ -157,9 +158,9 @@ int main()
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
-                window.close();
+                isRunning = false;
             if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
-                window.close();
+                isRunning = false;
             if (event.type == sf::Event::Resized)
                 glViewport(0, 0, event.size.width, event.size.height);
         }
@@ -185,7 +186,7 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        {
+        //{
             simpleShader.use();
             glm::mat4 model = glm::mat4(1);
             glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
@@ -197,22 +198,24 @@ int main()
             simpleShader.setMat4("projection", projection);
             simpleShader.setMat4("view", view);
             suzanne.draw(simpleShader);
-        }
-        {
+        //}
+        //{
             lampShader.use();
-            glm::mat4 model = glm::mat4(1);
+            model = glm::mat4(1);
             model = glm::translate(model, lightPos);
-            glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
-            glm::mat4 view = camera.getViewMatrix();
+            projection = camera.getPerspectiveMatrix({width, height});
+            view = camera.getViewMatrix();
             lampShader.setMat4("model", model);
             lampShader.setMat4("projection", projection);
             lampShader.setMat4("view", view);
             lamp.draw(lampShader);
-        }
+        //}
 
 
         window.display();
     }
+
+    window.close();
 
     return EXIT_SUCCESS;
 }
