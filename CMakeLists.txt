@@ -6,7 +6,7 @@ find_package(OpenGL MODULE REQUIRED)
 find_package(GLEW MODULE REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(assimp CONFIG REQUIRED)
-find_package(SFML MODULE REQUIRED COMPONENTS system window graphics)
+find_package(SFML MODULE REQUIRED COMPONENTS system window)
 
 add_executable(hello src/gl.cpp)
 
