@@ -75,10 +75,10 @@ public:
 		settings.minorVersion = 3;
 		settings.attributeFlags = sf::ContextSettings::Core;
 
-		sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
-		window.setMouseCursorVisible(false);
-		sf::Mouse::setPosition(sf::Vector2i{width/2, height/2});
-		window.setVerticalSyncEnabled(true);
+		sf::Window m_window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
+		m_window.setMouseCursorVisible(false);
+		sf::Mouse::setPosition(sf::Vector2i{width/2, height/2}, m_window);
+		m_window.setVerticalSyncEnabled(true);
 
 		glewExperimental = true;
 		if (glewInit() != GLEW_OK)
@@ -86,7 +86,7 @@ public:
 			fprintf(stderr, "Failed to initialize GLEW\n");
 		}
 
-		window.setActive();
+		m_window.setActive();
 
 		glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -117,7 +117,7 @@ int main()
 
     sf::Window window(sf::VideoMode(width, height), "SFML window with OpenGL", sf::Style::Default, settings);
     window.setMouseCursorVisible(false);
-    sf::Mouse::setPosition(sf::Vector2i{width/2, height/2});
+    sf::Mouse::setPosition(sf::Vector2i{width/2, height/2}, window);
     window.setVerticalSyncEnabled(true);
 
     glewExperimental = true;
@@ -135,14 +135,17 @@ int main()
 
     glViewport(0, 0, window.getSize().x, window.getSize().y);
 
-    Camera camera(glm::vec3{0,0,3});
+    Camera camera(glm::vec3{0,0,6});
     Shader lightingShader("shaders/lighting.vert", "shaders/lighting.frag");
     Shader lampShader("shaders/lamp.vert", "shaders/lamp.frag");
+    Shader simpleShader("shaders/simple.vert", "shaders/simple.frag");
+    Model suzanne("suzanne.obj");
+    Model lamp("sphere.obj");
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
 
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    glm::vec3 lightPos(10, 10, 0);
 
     // first, configure the cube's VAO (and VBO)
     unsigned int VBO, cubeVAO;
@@ -199,6 +202,10 @@ int main()
             camera.ProcessKeyboard(LEFT, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
             camera.ProcessKeyboard(RIGHT, deltaTime);
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+            camera.ProcessKeyboard(UP, deltaTime);
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+            camera.ProcessKeyboard(DOWN, deltaTime);
 
 
         camera.ProcessMouseMovement(
@@ -210,7 +217,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        // be sure to activate shader when setting uniforms/drawing objects
+        /*// be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
         lightingShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f});
         lightingShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
@@ -241,7 +248,33 @@ int main()
         lampShader.setMat4("model", model);
 
         glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36);*/
+
+        {
+            simpleShader.use();
+            glm::mat4 model = glm::mat4(1);
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+            glm::mat4 view = camera.GetViewMatrix();
+            simpleShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
+            simpleShader.setVec3("lightPos", lightPos);
+            simpleShader.setVec3("viewPos", camera.Position);
+            simpleShader.setMat4("model", model);
+            simpleShader.setMat4("projection", projection);
+            simpleShader.setMat4("view", view);
+            suzanne.draw(simpleShader);
+        }
+        {
+            lampShader.use();
+            glm::mat4 model = glm::mat4(1);
+            model = glm::translate(model, lightPos);
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
+            glm::mat4 view = camera.GetViewMatrix();
+            lampShader.setMat4("model", model);
+            lampShader.setMat4("projection", projection);
+            lampShader.setMat4("view", view);
+            lamp.draw(lampShader);
+        }
+
 
         window.display();
     }
