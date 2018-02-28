@@ -28,8 +28,8 @@ struct Vertex
     glm::vec3 position;
     glm::vec3 normal;
     glm::vec2 texCoord;
-    //glm::vec3 tangent;
-    //glm::vec3 bitangent;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
 };
 
 struct Texture
@@ -39,25 +39,29 @@ struct Texture
     std::string path;
 };
 
+struct Material
+{
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+    float shininess;
+};
+
 class Mesh
 {
 public:
 
-    std::vector<Vertex> m_vertices;
-    std::vector<unsigned int> m_indices;
-    std::vector<Texture> m_textures;
-    GLuint m_vao;
-
-    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, const Material& material)
     {
         m_vertices = vertices;
         m_indices = indices;
         m_textures = textures;
+        m_material = material;
 
         setupMesh();
     }
 
-    void Draw(Shader shader)
+    void Draw(Shader& shader)
     {
         unsigned int diffuseNr = 1;
         unsigned int specularNr = 1;
@@ -81,6 +85,11 @@ public:
             glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
         }
 
+        shader.setVec3("material.ambiant", m_material.ambient);
+        shader.setVec3("material.diffuse", m_material.diffuse);
+        shader.setVec3("material.specular", m_material.specular);
+        shader.setFloat("material.shininess", m_material.shininess);
+
         glBindVertexArray(m_vao);
         glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -90,20 +99,18 @@ public:
 
 private:
 
-    GLuint vbo, ebo;
-
     void setupMesh()
     {
         glGenVertexArrays(1, &m_vao);
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ebo);
+        glGenBuffers(1, &m_vbo);
+        glGenBuffers(1, &m_ebo);
 
         glBindVertexArray(m_vao);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
         glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), &m_vertices[0], GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(Vertex::AttribPosition);
@@ -115,14 +122,21 @@ private:
         glEnableVertexAttribArray(Vertex::AttribTexCoord);
         glVertexAttribPointer(Vertex::AttribTexCoord, decltype(std::declval<Vertex>().texCoord)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
-        //glEnableVertexAttribArray(Vertex::AttribTangent);
-        //glVertexAttribPointer(Vertex::AttribTangent, decltype(std::declval<Vertex>().tangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+        glEnableVertexAttribArray(Vertex::AttribTangent);
+        glVertexAttribPointer(Vertex::AttribTangent, decltype(std::declval<Vertex>().tangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
 
-        //glEnableVertexAttribArray(Vertex::AttribBitangent);
-        //glVertexAttribPointer(Vertex::AttribBiangent, decltype(std::declval<Vertex>().bitangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+        glEnableVertexAttribArray(Vertex::AttribBitangent);
+        glVertexAttribPointer(Vertex::AttribBitangent, decltype(std::declval<Vertex>().bitangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
 
         glBindVertexArray(0);
     }
+
+    std::vector<Vertex> m_vertices;
+    std::vector<unsigned int> m_indices;
+    std::vector<Texture> m_textures;
+    Material m_material;
+    GLuint m_vao, m_vbo, m_ebo;
 };
+
 #endif
 
