@@ -57,7 +57,7 @@ float cube[] = {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
 };
-
+/*
 class GLWindow
 {
 public:
@@ -101,7 +101,7 @@ private:
 	float m_deltaTime = 0.0f;
 	float m_lastFrame = 0.0f;
 };
-
+*/
 int main()
 {
     sf::ContextSettings settings;
@@ -136,7 +136,6 @@ int main()
     glViewport(0, 0, window.getSize().x, window.getSize().y);
 
     Camera camera(glm::vec3{0,0,6});
-    Shader lightingShader("shaders/lighting.vert", "shaders/lighting.frag");
     Shader lampShader("shaders/lamp.vert", "shaders/lamp.frag");
     Shader simpleShader("shaders/simple.vert", "shaders/simple.frag");
     Model suzanne("suzanne.obj");
@@ -146,35 +145,6 @@ int main()
     float lastFrame = 0.0f;
 
     glm::vec3 lightPos(10, 10, 0);
-
-    // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube), cube, GL_STATIC_DRAW);
-
-    glBindVertexArray(cubeVAO);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // note that we update the lamp's position attribute's stride to reflect the updated buffer data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
 
     sf::Clock clock;
     while (window.isOpen())
@@ -195,69 +165,34 @@ int main()
         }
 
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
-            camera.ProcessKeyboard(FORWARD, deltaTime);
+            camera.processKeyboard(Camera::Movement::Forward, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
+            camera.processKeyboard(Camera::Movement::Backward, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-            camera.ProcessKeyboard(LEFT, deltaTime);
+            camera.processKeyboard(Camera::Movement::Left, deltaTime);
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-            camera.ProcessKeyboard(UP, deltaTime);
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-            camera.ProcessKeyboard(DOWN, deltaTime);
+            camera.processKeyboard(Camera::Movement::Right, deltaTime);
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+            camera.processKeyboard(Camera::Movement::Up, deltaTime);
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+            camera.processKeyboard(Camera::Movement::Down, deltaTime);
 
 
-        camera.ProcessMouseMovement(
+        camera.processMouseMovement(
                         sf::Mouse::getPosition(window).x - width/2.0f,
-                        height/2.0f - sf::Mouse::getPosition(window).y,
-                        false);
+                        height/2.0f - sf::Mouse::getPosition(window).y);
         sf::Mouse::setPosition(sf::Vector2i{width/2, height/2}, window);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        /*// be sure to activate shader when setting uniforms/drawing objects
-        lightingShader.use();
-        lightingShader.setVec3("objectColor", {1.0f, 0.5f, 0.31f});
-        lightingShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
-        lightingShader.setVec3("lightPos", lightPos);
-
-        // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        lightingShader.setMat4("projection", projection);
-        lightingShader.setMat4("view", view);
-
-        // world transformation
-        glm::mat4 model;
-        lightingShader.setMat4("model", model);
-
-        // render the cube
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-        // also draw the lamp object
-        lampShader.use();
-        lampShader.setMat4("projection", projection);
-        lampShader.setMat4("view", view);
-        model = glm::mat4();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-        lampShader.setMat4("model", model);
-
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);*/
-
         {
             simpleShader.use();
             glm::mat4 model = glm::mat4(1);
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-            glm::mat4 view = camera.GetViewMatrix();
+            glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
+            glm::mat4 view = camera.getViewMatrix();
             simpleShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
             simpleShader.setVec3("lightPos", lightPos);
-            simpleShader.setVec3("viewPos", camera.Position);
+            simpleShader.setVec3("viewPos", camera.getPosition());
             simpleShader.setMat4("model", model);
             simpleShader.setMat4("projection", projection);
             simpleShader.setMat4("view", view);
@@ -267,8 +202,8 @@ int main()
             lampShader.use();
             glm::mat4 model = glm::mat4(1);
             model = glm::translate(model, lightPos);
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-            glm::mat4 view = camera.GetViewMatrix();
+            glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
+            glm::mat4 view = camera.getViewMatrix();
             lampShader.setMat4("model", model);
             lampShader.setMat4("projection", projection);
             lampShader.setMat4("view", view);
