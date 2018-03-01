@@ -6,6 +6,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
+#include <algorithm>
 
 class Camera
 {
@@ -73,12 +74,7 @@ public:
         m_pitch += yoffset;
 
         if (constrainPitch)
-        {
-            if (m_pitch > 89.0f)
-                m_pitch = 89.0f;
-            if (m_pitch < -89.0f)
-                m_pitch = -89.0f;
-        }
+            std::clamp(m_pitch, -89.0f, 89.0f);
 
         updateCameraVectors();
     }
@@ -87,10 +83,8 @@ public:
     {
         if (m_zoom >= 1.0f && m_zoom <= 45.0f)
             m_zoom -= yoffset;
-        if (m_zoom <= 1.0f)
-            m_zoom = 1.0f;
-        if (m_zoom >= 45.0f)
-            m_zoom = 45.0f;
+
+        std::clamp(m_zoom, 1.0f, 45.0f);
     }
 
     glm::vec3 getPosition() const

@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "Shader.hpp"
 
@@ -90,7 +91,7 @@ public:
             glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
         }
 
-        shader.setVec3("material.ambiant", m_material.ambient);
+        shader.setVec3("material.ambient", m_material.ambient);
         shader.setVec3("material.diffuse", m_material.diffuse);
         shader.setVec3("material.specular", m_material.specular);
         shader.setFloat("material.shininess", m_material.shininess);
@@ -119,19 +120,19 @@ private:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), &m_indices[0], GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(Vertex::AttribPosition);
-        glVertexAttribPointer(Vertex::AttribPosition, decltype(std::declval<Vertex>().position)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+        glVertexAttribPointer(Vertex::AttribPosition, m_vertices[0].position.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
 
         glEnableVertexAttribArray(Vertex::AttribNormal);
-        glVertexAttribPointer(Vertex::AttribNormal, decltype(std::declval<Vertex>().normal)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+        glVertexAttribPointer(Vertex::AttribNormal, m_vertices[0].normal.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
         glEnableVertexAttribArray(Vertex::AttribTexCoord);
-        glVertexAttribPointer(Vertex::AttribTexCoord, decltype(std::declval<Vertex>().texCoord)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+        glVertexAttribPointer(Vertex::AttribTexCoord, m_vertices[0].texCoord.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 
         glEnableVertexAttribArray(Vertex::AttribTangent);
-        glVertexAttribPointer(Vertex::AttribTangent, decltype(std::declval<Vertex>().tangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
+        glVertexAttribPointer(Vertex::AttribTangent, m_vertices[0].tangent.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
 
         glEnableVertexAttribArray(Vertex::AttribBitangent);
-        glVertexAttribPointer(Vertex::AttribBitangent, decltype(std::declval<Vertex>().bitangent)::length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
+        glVertexAttribPointer(Vertex::AttribBitangent, m_vertices[0].bitangent.length(), GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, bitangent));
 
         glBindVertexArray(0);
     }

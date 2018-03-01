@@ -140,6 +140,7 @@ int main()
     Shader simpleShader("shaders/simple.vert", "shaders/simple.frag");
     Model suzanne("suzanne.obj");
     Model lamp("sphere.obj");
+    Model openpode("openpode_attache_milieu.obj");
 
     float deltaTime = 0.0f;
     float lastFrame = 0.0f;
@@ -147,8 +148,7 @@ int main()
     glm::vec3 lightPos(10, 10, 0);
 
     sf::Clock clock;
-    bool isRunning = true;
-    while (isRunning)
+    while (window.isOpen())
     {
         float currentFrame = clock.getElapsedTime().asSeconds();
         deltaTime = currentFrame - lastFrame;
@@ -158,9 +158,9 @@ int main()
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
-                isRunning = false;
+                window.close();
             if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::Escape))
-                isRunning = false;
+                window.close();
             if (event.type == sf::Event::Resized)
                 glViewport(0, 0, event.size.width, event.size.height);
         }
@@ -186,7 +186,7 @@ int main()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        //{
+        {
             simpleShader.use();
             glm::mat4 model = glm::mat4(1);
             glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
@@ -198,24 +198,37 @@ int main()
             simpleShader.setMat4("projection", projection);
             simpleShader.setMat4("view", view);
             suzanne.draw(simpleShader);
-        //}
-        //{
+        }
+        {
             lampShader.use();
-            model = glm::mat4(1);
+            glm::mat4 model = glm::mat4(1);
             model = glm::translate(model, lightPos);
-            projection = camera.getPerspectiveMatrix({width, height});
-            view = camera.getViewMatrix();
+            glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
+            glm::mat4 view = camera.getViewMatrix();
             lampShader.setMat4("model", model);
             lampShader.setMat4("projection", projection);
             lampShader.setMat4("view", view);
             lamp.draw(lampShader);
-        //}
+        }
+        {
+            simpleShader.use();
+            glm::mat4 model = glm::mat4(1);
+            model = glm::translate(model, glm::vec3{5.0, 0, 0});
+            model = glm::scale(model, glm::vec3{0.01f});
+            glm::mat4 projection = camera.getPerspectiveMatrix({width, height});
+            glm::mat4 view = camera.getViewMatrix();
+            simpleShader.setVec3("lightColor", {1.0f, 1.0f, 1.0f});
+            simpleShader.setVec3("lightPos", lightPos);
+            simpleShader.setVec3("viewPos", camera.getPosition());
+            simpleShader.setMat4("model", model);
+            simpleShader.setMat4("projection", projection);
+            simpleShader.setMat4("view", view);
+            openpode.draw(simpleShader);
+        }
 
 
         window.display();
     }
-
-    window.close();
 
     return EXIT_SUCCESS;
 }
