@@ -11,6 +11,6 @@ find_package(SFML MODULE REQUIRED COMPONENTS system window)
 add_executable(hello src/gl.cpp)
 set_property(TARGET hello PROPERTY CXX_STANDARD 17)
 
-target_include_directories(hello PRIVATE ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIRS} ${SFML_INCLUDE_DIR})
+target_include_directories(hello PRIVATE OpenGL::GL GLEW::GLEW ${GLM_INCLUDE_DIRS} ${ASSIMP_INCLUDE_DIRS} ${SFML_INCLUDE_DIR})
 
-target_link_libraries(hello LINK_PRIVATE ${OPENGL_gl_LIBRARY} ${GLEW_LIBRARIES} ${ASSIMP_LIBRARIES} ${SFML_LIBRARIES})
+target_link_libraries(hello LINK_PRIVATE OpenGL::GL GLEW::GLEW ${ASSIMP_LIBRARIES} ${SFML_LIBRARIES})
